@@ -177,23 +177,10 @@ export default function Home() {
 
 // Refining view component
 function RefiningView() {
-  const [dots, setDots] = useState('')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isRefining, setIsRefining] = useState(false)
   const router = useRouter()
-
-  useEffect(() => {
-    if (!isRefining) return
-
-    const interval = setInterval(() => {
-      setDots(prev => {
-        if (prev === '...') return ''
-        return prev + '.'
-      })
-    }, 400)
-    return () => clearInterval(interval)
-  }, [isRefining])
 
   const handleImageUploaded = (uploadedUrl: string) => {
     setImageUrl(uploadedUrl)
@@ -235,8 +222,8 @@ function RefiningView() {
       {/* Card container */}
       <div className="bg-white rounded-[6px] shadow-2xl overflow-hidden relative">
         {/* Image container with fixed inner frame and shimmer overlay */}
-        <div className="px-10 pt-10 pb-8 flex flex-col items-center gap-8">
-          <div className="relative w-[800px] max-w-full h-[320px] rounded-[6px] bg-white flex items-center justify-center overflow-hidden">
+        <div className="px-10 pt-[69px] pb-[69px] flex flex-col items-center gap-0">
+          <div className="relative w-[800px] max-w-full rounded-[6px] bg-white flex items-center justify-center overflow-hidden">
             <div className="relative w-[325.35px] h-[215px] overflow-hidden shadow-md bg-white">
               {/* Image or placeholder with fixed container */}
               {showPlaceholderImage ? (
@@ -261,12 +248,12 @@ function RefiningView() {
           </div>
           
           {/* Refining text */}
-          <div className="text-center">
+          <div className="text-center mt-[32px]">
             <h2 
-              className="text-[28px] font-bold tracking-[0.08em] text-gray-900 mb-2 uppercase"
+              className="text-[32px] font-bold tracking-[0.08em] text-gray-900 mb-[16px] uppercase"
               style={{ fontFamily: 'var(--font-abb-voice-display)' }}
             >
-              REFINING<span className="inline-block w-8 text-left">{dots}</span>
+              REFINING
             </h2>
             <p className="text-gray-600 text-sm">
               {showPlaceholderImage
