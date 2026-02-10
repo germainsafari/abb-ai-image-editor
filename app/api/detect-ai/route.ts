@@ -58,11 +58,15 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json()
 
+    console.log("SightEngine response:", JSON.stringify(data, null, 2))
+
     // Extract AI generation probability from SightEngine response
-    // SightEngine returns a score between 0 and 1, where 1 means 100% AI-generated
-    const aiGeneratedScore = data.genai?.ai_generated || 0
+    // SightEngine returns the score under data.type.ai_generated (a float between 0 and 1)
+    const aiGeneratedScore = data.type?.ai_generated ?? 0
     const probability = Math.round(aiGeneratedScore * 100) // Convert to percentage
     const isAIGenerated = probability >= 50 // Threshold: 50% or higher is "likely"
+
+    console.log(`AI detection result: score=${aiGeneratedScore}, probability=${probability}%, isAIGenerated=${isAIGenerated}`)
 
     return NextResponse.json({
       isAIGenerated,
