@@ -244,7 +244,7 @@ export default function EditorPage() {
       : imageState.height
 
   return (
-    <div className="h-dvh max-h-dvh bg-background flex flex-col overflow-hidden relative">
+    <div className="h-dvh bg-background flex flex-col overflow-hidden relative" style={{ minHeight: '500px' }}>
       <Header />
 
       {/* Banner / crop-header: fixed min-height so image card stays stable when banner appears/disappears. */}

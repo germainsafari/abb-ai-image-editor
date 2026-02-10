@@ -978,11 +978,13 @@ export default function EditorCanvas({
       <div
         ref={containerRef}
         data-editor-image-card
-        className="flex items-start justify-center px-4 pt-0 pb-0 sm:px-6 lg:px-8 overflow-hidden min-h-0"
+        className={`flex items-start justify-center px-4 pt-0 pb-0 sm:px-6 lg:px-8 min-h-0 ${
+          editorMode === "ai-result" ? "overflow-y-auto overflow-x-hidden" : "overflow-hidden"
+        }`}
       >
         {/* AI Result Split View */}
         {editorMode === "ai-result" && aiEditResult && (
-          <div className="w-full flex flex-col items-center">
+          <div className="w-full flex flex-col items-center pb-32">
             <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
               <div className="flex flex-col items-center">
                 <span className="text-sm text-[#7C3AED] font-medium mb-2">Before</span>
@@ -1005,62 +1007,6 @@ export default function EditorCanvas({
                     style={{ maxHeight: `calc(${dynamicMaxHeight} * 0.7)` }}
                   />
                 </div>
-              </div>
-            </div>
-
-            {/* Done message with Retry/Apply */}
-            <div
-              className="mt-6 bg-white rounded-lg shadow-2xl flex items-center justify-between mx-auto"
-              style={{
-                width: '664px',
-                height: '88px',
-                padding: '20px 24px',
-                boxShadow: '0 0 58.2px 0 rgba(0, 0, 0, 0.25)',
-                fontFamily: 'var(--font-abb-voice)',
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <CheckIcon className="flex-shrink-0" />
-                <span 
-                  className="text-sm"
-                  style={{ fontWeight: 400 }}
-                >
-                  Done! How do you like it?
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    onAIEditResult(null)
-                    onModeChange("ai-edit")
-                  }}
-                  className="abb-gradient-hover-pill flex items-center gap-2"
-                  style={{
-                    fontFamily: 'var(--font-abb-voice)',
-                    fontWeight: 500,
-                    fontSize: '12px',
-                    lineHeight: '100%',
-                    height: '48px',
-                    paddingLeft: '16px',
-                    paddingRight: '16px',
-                  }}
-                >
-                  <span className="text-[#000000]">Retry</span> <RetryIcon className="w-4 h-4 text-[#000000]" />
-                </button>
-                <button
-                  onClick={() => onAIEditApply(aiEditResult.afterUrl)}
-                  className="abb-red-button-gradient-hover px-4 bg-[#E30613] text-white rounded-full"
-                  style={{
-                    fontFamily: 'var(--font-abb-voice)',
-                    fontWeight: 500,
-                    fontSize: '12px',
-                    lineHeight: '100%',
-                    height: '48px',
-                    borderRadius: '28px',
-                  }}
-                >
-                  Apply
-                </button>
               </div>
             </div>
           </div>
@@ -1353,26 +1299,99 @@ export default function EditorCanvas({
               zIndex: 9999,
             }}
           >
-            <div
-              className="w-full max-w-3xl px-4 pointer-events-auto animate-in fade-in-0 slide-in-from-bottom-4 duration-300 ease-out"
-              style={{
-                maxHeight: `calc(100vh - (${popupBottomPx}px + 16px))`,
-                overflowY: "auto",
-              }}
-            >
-              <CropPresetTray
-                categories={CROP_CATEGORIES}
-                selectedCategory={selectedCategory}
-                selectedPreset={selectedPreset}
-                customRatioWidth={customRatioWidth}
-                customRatioHeight={customRatioHeight}
-                currentCategoryLabel={currentCategory.label}
-                onSelectCategory={handleCategorySelect}
-                onSelectPreset={handlePresetSelect}
-                onChangeCustomWidth={setCustomRatioWidth}
-                onChangeCustomHeight={setCustomRatioHeight}
-                onHidePopup={onCropPopupVisibleChange ? () => onCropPopupVisibleChange(false) : undefined}
-              />
+            <div className="w-full max-w-3xl px-4 pointer-events-auto animate-in fade-in-0 slide-in-from-bottom-4 duration-300 ease-out">
+              <div
+                className="rounded-2xl border border-border bg-white abb-popup-overlay-shadow"
+                style={{
+                  maxHeight: `calc(100vh - (${popupBottomPx}px + 16px))`,
+                  overflowY: "auto",
+                }}
+              >
+                <CropPresetTray
+                  categories={CROP_CATEGORIES}
+                  selectedCategory={selectedCategory}
+                  selectedPreset={selectedPreset}
+                  customRatioWidth={customRatioWidth}
+                  customRatioHeight={customRatioHeight}
+                  currentCategoryLabel={currentCategory.label}
+                  onSelectCategory={handleCategorySelect}
+                  onSelectPreset={handlePresetSelect}
+                  onChangeCustomWidth={setCustomRatioWidth}
+                  onChangeCustomHeight={setCustomRatioHeight}
+                  onHidePopup={onCropPopupVisibleChange ? () => onCropPopupVisibleChange(false) : undefined}
+                />
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* Done! How do you like it? – portaled so it sits above the controls bar; always visible */}
+      {editorMode === "ai-result" &&
+        aiEditResult &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed inset-x-0 flex justify-center"
+            style={{
+              bottom: `calc(${popupBottomPx}px + env(safe-area-inset-bottom, 0px))`,
+              zIndex: 9999,
+            }}
+          >
+            <div className="w-full max-w-[664px] px-4 pointer-events-auto animate-in fade-in-0 slide-in-from-bottom-4 duration-300 ease-out">
+              <div
+                className="bg-white rounded-lg flex items-center justify-between"
+                style={{
+                  height: '88px',
+                  padding: '20px 24px',
+                  boxShadow: '0 0 58.2px 0 rgba(0, 0, 0, 0.1)',
+                  fontFamily: 'var(--font-abb-voice)',
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <CheckIcon className="flex-shrink-0" />
+                  <span
+                    className="text-sm"
+                    style={{ fontWeight: 400 }}
+                  >
+                    Done! How do you like it?
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      onAIEditResult(null)
+                      onModeChange("ai-edit")
+                    }}
+                    className="abb-gradient-hover-pill flex items-center gap-2"
+                    style={{
+                      fontFamily: 'var(--font-abb-voice)',
+                      fontWeight: 500,
+                      fontSize: '12px',
+                      lineHeight: '100%',
+                      height: '48px',
+                      paddingLeft: '16px',
+                      paddingRight: '16px',
+                    }}
+                  >
+                    <span className="text-[#000000]">Retry</span> <RetryIcon className="w-4 h-4 text-[#000000]" />
+                  </button>
+                  <button
+                    onClick={() => onAIEditApply(aiEditResult.afterUrl)}
+                    className="abb-red-button-gradient-hover px-4 bg-[#E30613] text-white rounded-full"
+                    style={{
+                      fontFamily: 'var(--font-abb-voice)',
+                      fontWeight: 500,
+                      fontSize: '12px',
+                      lineHeight: '100%',
+                      height: '48px',
+                      borderRadius: '28px',
+                    }}
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
             </div>
           </div>,
           document.body

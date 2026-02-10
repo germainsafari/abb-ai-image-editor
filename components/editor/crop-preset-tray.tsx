@@ -46,9 +46,10 @@ const CropPresetTray: React.FC<CropPresetTrayProps> = ({
 }) => {
   const [hoveredPreset, setHoveredPreset] = useState<CategoryPreset | null>(null)
 
-  // Shared tray wrapper: design padding 20px 24px, radius 16px; pb-5 keeps category chips 20px from bottom; overlay shadow per design
+  // Shared tray wrapper: internal padding only – outer visual styling (bg, border, shadow, radius)
+  // is applied by the portal wrapper in editor-canvas.tsx so box-shadow isn't clipped by overflow.
   const trayWrapperClass =
-    "mx-auto rounded-2xl border border-border bg-white abb-popup-overlay-shadow px-6 pt-5 pb-5 pointer-events-auto min-w-[320px] min-h-[240px]"
+    "px-6 pt-5 pb-5 min-w-[320px] min-h-[240px]"
 
   // Initial info state – no category selected yet
   if (!selectedCategory) {
