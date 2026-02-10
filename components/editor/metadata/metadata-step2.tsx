@@ -104,7 +104,7 @@ export default function MetadataStep2({
                 onMetadataChange({ ...metadata, description: value })
               }}
               rows={3}
-              className="w-full py-[10px] px-3 border border-[var(--ABB-Black,#000)] rounded-lg bg-[var(--Primary-White,#FFF)] resize-none focus:outline-none focus:ring-2 focus:ring-[#E30613] focus:border-[#E30613] selection:bg-[var(--ABB-Black)] selection:text-[var(--Primary-White)] placeholder:text-muted-foreground"
+              className="w-full py-[10px] px-3 border border-[var(--ABB-Black,#000)] rounded-lg bg-[var(--Primary-White,#FFF)] resize-none focus:outline-none focus:ring-2 focus:ring-[var(--ABB-Lilac,#6764F6)]/20 focus:ring-offset-0 focus:border-[var(--ABB-Lilac,#6764F6)] selection:bg-[var(--ABB-Black)] selection:text-[var(--Primary-White)] placeholder:text-muted-foreground"
               maxLength={300}
               style={{ 
                 fontFamily: 'var(--font-abb-voice), sans-serif',
