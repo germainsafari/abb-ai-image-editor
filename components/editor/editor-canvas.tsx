@@ -1030,58 +1030,22 @@ export default function EditorCanvas({
                     crossOrigin="anonymous"
                   />
                   
-                  {/* Radial blur overlay - multiple layers for center-to-edge blur effect */}
+                  {/* Uniform blur overlay - single layer for consistent blur across entire image */}
                   {imageState.isBlurred && (
                     <>
-                      {/* Strong blur layer for edges - masked to show only outer areas */}
+                      {/* Full uniform blur layer */}
                       <div
-                        className={`absolute top-0 left-0 w-full h-full z-10 block ${
+                        className={`absolute top-0 left-0 w-full h-full z-10 block overflow-hidden ${
                           isBlurAnimating ? "blur-progressive-animation" : ""
                         }`}
                       >
                         <img
                           src={editorMode === "crop" ? imageState.cropSourceUrl : (imageState.currentUrl || "/placeholder.svg")}
-                          alt="Blurred edges"
-                          className="w-full h-full object-contain blur-lg"
+                          alt="Blurred image"
+                          className="w-full h-full object-contain"
                           style={{
-                            maskImage: 'radial-gradient(circle, transparent 60%, black 80%)',
-                            WebkitMaskImage: 'radial-gradient(circle, transparent 60%, black 80%)',
-                          }}
-                          crossOrigin="anonymous"
-                        />
-                      </div>
-
-                      {/* Medium blur layer for mid areas */}
-                      <div
-                        className={`absolute top-0 left-0 w-full h-full z-10 block ${
-                          isBlurAnimating ? "blur-progressive-animation" : ""
-                        }`}
-                      >
-                        <img
-                          src={editorMode === "crop" ? imageState.cropSourceUrl : (imageState.currentUrl || "/placeholder.svg")}
-                          alt="Blurred mid areas"
-                          className="w-full h-full object-contain blur-md"
-                          style={{
-                            maskImage: 'radial-gradient(circle, transparent 40%, black 60%, transparent 80%)',
-                            WebkitMaskImage: 'radial-gradient(circle, transparent 40%, black 60%, transparent 80%)',
-                          }}
-                          crossOrigin="anonymous"
-                        />
-                      </div>
-
-                      {/* Light blur layer for center */}
-                      <div
-                        className={`absolute top-0 left-0 w-full h-full z-10 block ${
-                          isBlurAnimating ? "blur-progressive-animation" : ""
-                        }`}
-                      >
-                        <img
-                          src={editorMode === "crop" ? imageState.cropSourceUrl : (imageState.currentUrl || "/placeholder.svg")}
-                          alt="Blurred center"
-                          className="w-full h-full object-contain blur-sm"
-                          style={{
-                            maskImage: 'radial-gradient(circle, black 40%, transparent 60%)',
-                            WebkitMaskImage: 'radial-gradient(circle, black 40%, transparent 60%)',
+                            filter: 'blur(16px)',
+                            transform: 'scale(1.12)',
                           }}
                           crossOrigin="anonymous"
                         />
