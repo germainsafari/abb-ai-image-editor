@@ -45,13 +45,29 @@ export default function DownloadStep({
       <div className="flex flex-col gap-12">
         {/* Format selection */}
         <div className="flex flex-col gap-3">
-          <label className="text-sm font-medium text-black">Choose file type</label>
+          <label
+            className="text-sm"
+            style={{
+              color: 'var(--Grey---90, #1F1F1F)',
+              fontFamily: 'var(--font-abb-voice-medium)',
+              fontSize: 'var(--Typography-Size-Body-x-small, 14px)',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              lineHeight: '21px',
+              letterSpacing: 'var(--Typography-Letter-Spacing-Body-x-small, 0)',
+            }}
+          >
+            Choose file type
+          </label>
           <div className="flex flex-col gap-2">
             {(["PNG", "JPG"] as const).map((fmt) => (
-              <label 
-                key={fmt} 
-                className="flex items-center gap-2 cursor-pointer"
-                style={{ minHeight: '24px' }}
+              <label
+                key={fmt}
+                className="flex items-start cursor-pointer"
+                style={{ 
+                  minHeight: '24px',
+                  gap: 'var(--Spacing-Component-xxx-small, 8px)',
+                }}
               >
                 <div className="relative">
                   <input
@@ -61,18 +77,40 @@ export default function DownloadStep({
                     onChange={() => onFormatChange(fmt)}
                     className="sr-only"
                   />
-                  <div 
-                    className="w-4 h-4 rounded-full border-2 border-black bg-white flex items-center justify-center transition-all"
+                  <div
+                    className="flex items-center justify-center rounded-full bg-white transition-all"
+                    style={{
+                      width: 24,
+                      height: 24,
+                      border: '1px solid black',
+                    }}
                   >
                     {format === fmt && (
-                      <div 
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: '#6764F6' }}
+                      <div
+                        className="rounded-full"
+                        style={{
+                          width: 16,
+                          height: 16,
+                          backgroundColor: '#615EEF',
+                        }}
                       />
                     )}
                   </div>
                 </div>
-                <span className="text-sm font-medium text-black">{fmt}</span>
+                <span
+                  className="text-sm"
+                  style={{
+                    color: 'var(--Colour-Shades-Grey-grey-90, #1F1F1F)',
+                    fontFamily: 'var(--font-abb-voice)',
+                    fontSize: 'var(--Typography-Size-Label-medium, 14px)',
+                    fontStyle: 'normal',
+                    fontWeight: 400,
+                    lineHeight: 'var(--Typography-Line-Height-Label-medium, 21px)',
+                    letterSpacing: 'var(--Typography-Letter-Spacing-Label-small, 0.12px)',
+                  }}
+                >
+                  {fmt}
+                </span>
               </label>
             ))}
           </div>
@@ -95,7 +133,20 @@ export default function DownloadStep({
         {/* Info row */}
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <div className="text-xs font-medium text-black mb-1">Image size</div>
+            <div
+              className="text-xs mb-1"
+              style={{
+                color: 'var(--Grey---90, #1F1F1F)',
+                fontFamily: 'var(--font-abb-voice-medium)',
+                fontSize: 'var(--Typography-Size-Body-x-small, 14px)',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                lineHeight: '21px',
+                letterSpacing: 'var(--Typography-Letter-Spacing-Body-x-small, 0)',
+              }}
+            >
+              Image size
+            </div>
             <div className="flex items-center gap-1.5 text-gray-500">
               <span className="text-sm font-medium text-gray-500">
                 {imageSize}
@@ -103,11 +154,37 @@ export default function DownloadStep({
             </div>
           </div>
           <div>
-            <div className="text-xs font-medium text-black mb-1">Metadata</div>
+            <div
+              className="text-xs mb-1"
+              style={{
+                color: 'var(--Grey---90, #1F1F1F)',
+                fontFamily: 'var(--font-abb-voice-medium)',
+                fontSize: 'var(--Typography-Size-Body-x-small, 14px)',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                lineHeight: '21px',
+                letterSpacing: 'var(--Typography-Letter-Spacing-Body-x-small, 0)',
+              }}
+            >
+              Metadata
+            </div>
             <div className="text-sm font-medium text-gray-500">{metadataApplied ? "Added" : "Not added"}</div>
           </div>
           <div>
-            <div className="text-xs font-medium text-black mb-1">File name preview:</div>
+            <div
+              className="text-xs mb-1"
+              style={{
+                color: 'var(--Grey---90, #1F1F1F)',
+                fontFamily: 'var(--font-abb-voice-medium)',
+                fontSize: 'var(--Typography-Size-Body-x-small, 14px)',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                lineHeight: '21px',
+                letterSpacing: 'var(--Typography-Letter-Spacing-Body-x-small, 0)',
+              }}
+            >
+              File name preview:
+            </div>
             <div className="text-sm font-medium text-gray-500 truncate">
               {metadataApplied 
                 ? `${previewFileName}.${format.toLowerCase()}` 
