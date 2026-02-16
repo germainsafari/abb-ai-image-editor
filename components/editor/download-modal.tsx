@@ -710,22 +710,27 @@ export default function DownloadModal({ isOpen, imageState, onClose, skipToDownl
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 sm:p-5 lg:p-6">
       <div 
-        className={`bg-white flex flex-col w-full ${
+        className={`bg-white flex flex-col w-full overflow-hidden ${
           isMetadataStep
             ? "max-w-[890px] lg:w-[890px] lg:h-[700px] max-h-[calc(100vh-32px)] sm:max-h-[calc(100vh-40px)] lg:max-h-[calc(100vh-64px)]"
             : isNextStep
               ? "max-w-[800px] lg:w-[800px] lg:h-[487px] max-h-[calc(100vh-32px)] sm:max-h-[calc(100vh-40px)] lg:max-h-[calc(100vh-64px)]"
               : "max-w-[800px] max-h-[calc(100vh-32px)] sm:max-h-[calc(100vh-40px)] lg:max-h-[calc(100vh-48px)]"
-        } overflow-auto`}
+        }`}
         style={{
           borderRadius: '8px',
-          paddingTop: isMetadataStep ? '0' : '56px',
-          paddingRight: isMetadataStep ? '0' : '40px',
-          paddingBottom: isMetadataStep ? '0' : '56px',
-          paddingLeft: isMetadataStep ? '0' : '40px',
           boxShadow: '0 0 58.2px 0 rgba(0, 0, 0, 0.25)'
         }}
       >
+        <div
+          className="flex flex-col flex-1 min-h-0 overflow-auto"
+          style={{
+            paddingTop: isMetadataStep ? '0' : '56px',
+            paddingRight: isMetadataStep ? '0' : '40px',
+            paddingBottom: isMetadataStep ? '0' : '56px',
+            paddingLeft: isMetadataStep ? '0' : '40px',
+          }}
+        >
         {step === "download" && (
           <DownloadStep
             format={format}
@@ -739,6 +744,8 @@ export default function DownloadModal({ isOpen, imageState, onClose, skipToDownl
             onDownload={handleDownload}
             onUploadToMediaBank={handleUploadToMediaBank}
             onCancel={onClose}
+            metadata={metadata}
+            sourceInfo={sourceInfo}
           />
         )}
 
@@ -903,6 +910,7 @@ export default function DownloadModal({ isOpen, imageState, onClose, skipToDownl
             </div>
           </>
         )}
+        </div>
       </div>
     </div>
   )
