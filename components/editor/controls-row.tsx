@@ -24,6 +24,7 @@ interface ControlsRowProps {
   imageState: ImageState
   hasCropPresetSelected?: boolean
   containerWidth?: number | null
+  walkthroughActive?: boolean
 }
 
 export default function ControlsRow({
@@ -37,6 +38,7 @@ export default function ControlsRow({
   onModeChange,
   imageState,
   hasCropPresetSelected = false,
+  walkthroughActive = false,
 }: ControlsRowProps) {
   const [showMetadataPrompt, setShowMetadataPrompt] = useState(false)
   const [showDownloadModal, setShowDownloadModal] = useState(false)
@@ -76,164 +78,221 @@ export default function ControlsRow({
       {/* Controls container: 24px gap above (image card → control row); extra space below */}
       <div
         data-editor-controls
-        className="flex justify-center px-4 sm:px-6 flex-shrink-0 pt-6 pb-8"
+        className={`flex justify-center px-4 sm:px-6 flex-shrink-0 pt-6 pb-8 ${walkthroughActive ? 'relative z-[57]' : ''}`}
       >
         <div className="w-full max-w-5xl flex justify-center">
           {/* Bottom Bar Component - Rectangular with rounded corners */}
           <div
             data-controls-bar
-            className="w-full flex items-center bg-[#F0F0F0] rounded-lg"
-            style={{ height: "64px", padding: "8px 12px" }}
+            className={`w-full flex items-center rounded-lg ${walkthroughActive ? '' : 'bg-[#F0F0F0]'}`}
+            style={{
+              height: "64px",
+              padding: "8px 12px",
+              ...(walkthroughActive ? { pointerEvents: 'none' as const } : {}),
+            }}
           >
-            {/* Left Group: Undo/Redo - flex-1 so left/right balance and center stays fixed */}
-            <div className="flex items-center gap-0.5 flex-1 justify-start min-w-0">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onUndo}
-                    disabled={!canUndo}
-                    className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Image src="/undo.svg" alt="Undo" width={18} height={18} className="w-[18px] h-[18px]" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Undo</p>
-                </TooltipContent>
-              </Tooltip>
+            {/* Left Group: Undo/Redo */}
+            <div className="flex items-center flex-1 justify-start min-w-0">
+              <div
+                data-tool-pill="undo-redo"
+                className="flex items-center justify-center"
+                style={walkthroughActive ? {
+                  width: '115px',
+                  height: '58px',
+                  borderRadius: '36px',
+                  background: '#FFFFFF',
+                  gap: '2px',
+                } : { gap: '2px' }}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      data-tool="undo"
+                      variant="ghost"
+                      size="sm"
+                      onClick={onUndo}
+                      disabled={!canUndo}
+                      className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Image src="/undo.svg" alt="Undo" width={18} height={18} className="w-[18px] h-[18px]" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Undo</p>
+                  </TooltipContent>
+                </Tooltip>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onRedo}
-                    disabled={!canRedo}
-                    className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Image src="/redo.svg" alt="Redo" width={18} height={18} className="w-[18px] h-[18px]" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Redo</p>
-                </TooltipContent>
-              </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      data-tool="redo"
+                      variant="ghost"
+                      size="sm"
+                      onClick={onRedo}
+                      disabled={!canRedo}
+                      className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Image src="/redo.svg" alt="Redo" width={18} height={18} className="w-[18px] h-[18px]" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Redo</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
 
-            {/* Center Group: Main Tools - no flex grow/shrink so it keeps fixed width; left/right flex-1 keeps it centered */}
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {/* Crop Button - no tooltip when crop or AI edit panel is open */}
-              {showMainTooltips ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onModeChange(isCropMode ? "view" : "crop")}
-                      className={`h-9 w-9 p-0 rounded-md transition-colors ${
-                        isCropMode
-                          ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
-                          : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
-                      }`}
-                    >
-                      <CropIcon className="w-[18px] h-[18px]" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Crop</p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onModeChange(isCropMode ? "view" : "crop")}
-                  className={`h-9 w-9 p-0 rounded-md transition-colors ${
-                    isCropMode
-                      ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
-                      : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
-                  }`}
-                >
-                  <CropIcon className="w-[18px] h-[18px]" />
-                </Button>
-              )}
+            {/* Center Group: Main Tools */}
+            <div className="flex items-center flex-shrink-0" style={{ gap: walkthroughActive ? '8px' : '4px' }}>
+              {/* Crop pill */}
+              <div
+                data-tool-pill="crop"
+                className="flex items-center justify-center"
+                style={walkthroughActive ? {
+                  width: '58px',
+                  height: '58px',
+                  borderRadius: '29px',
+                  background: '#FFFFFF',
+                } : undefined}
+              >
+                {showMainTooltips ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        data-tool="crop"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onModeChange(isCropMode ? "view" : "crop")}
+                        className={`h-9 w-9 p-0 rounded-md transition-colors ${
+                          isCropMode
+                            ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
+                            : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
+                        }`}
+                      >
+                        <CropIcon className="w-[18px] h-[18px]" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Crop</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Button
+                    data-tool="crop"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onModeChange(isCropMode ? "view" : "crop")}
+                    className={`h-9 w-9 p-0 rounded-md transition-colors ${
+                      isCropMode
+                        ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
+                        : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
+                    }`}
+                  >
+                    <CropIcon className="w-[18px] h-[18px]" />
+                  </Button>
+                )}
+              </div>
 
-              {/* AI Edit Button - no tooltip when crop or AI edit panel is open */}
-              {showMainTooltips ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onModeChange(isAIEditMode ? "view" : "ai-edit")}
-                      className={`h-9 w-9 p-0 rounded-md transition-colors ${
-                        isAIEditMode
-                          ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
-                          : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
-                      }`}
-                    >
-                      <AIIcon className="w-[18px] h-[18px]" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Change scene</p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onModeChange(isAIEditMode ? "view" : "ai-edit")}
-                  className={`h-9 w-9 p-0 rounded-md transition-colors ${
-                    isAIEditMode
-                      ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
-                      : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
-                  }`}
-                >
-                  <AIIcon className="w-[18px] h-[18px]" />
-                </Button>
-              )}
+              {/* AI Edit pill */}
+              <div
+                data-tool-pill="ai-edit"
+                className="flex items-center justify-center"
+                style={walkthroughActive ? {
+                  width: '58px',
+                  height: '58px',
+                  borderRadius: '29px',
+                  background: '#FFFFFF',
+                } : undefined}
+              >
+                {showMainTooltips ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        data-tool="ai-edit"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onModeChange(isAIEditMode ? "view" : "ai-edit")}
+                        className={`h-9 w-9 p-0 rounded-md transition-colors ${
+                          isAIEditMode
+                            ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
+                            : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
+                        }`}
+                      >
+                        <AIIcon className="w-[18px] h-[18px]" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Change scene</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Button
+                    data-tool="ai-edit"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onModeChange(isAIEditMode ? "view" : "ai-edit")}
+                    className={`h-9 w-9 p-0 rounded-md transition-colors ${
+                      isAIEditMode
+                        ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
+                        : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
+                    }`}
+                  >
+                    <AIIcon className="w-[18px] h-[18px]" />
+                  </Button>
+                )}
+              </div>
 
-              {/* Blur/Droplet Button - no tooltip when crop or AI edit panel is open */}
-              {showMainTooltips ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={onBlur}
-                      className={`h-9 w-9 p-0 rounded-md transition-colors ${
-                        isBlurred
-                          ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
-                          : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
-                      }`}
-                    >
-                      <BlurIcon className="w-[18px] h-[18px]" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Blur</p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onBlur}
-                  className={`h-9 w-9 p-0 rounded-md transition-colors ${
-                    isBlurred
-                      ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
-                      : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
-                  }`}
-                >
-                  <BlurIcon className="w-[18px] h-[18px]" />
-                </Button>
-              )}
+              {/* Blur pill */}
+              <div
+                data-tool-pill="blur"
+                className="flex items-center justify-center"
+                style={walkthroughActive ? {
+                  width: '58px',
+                  height: '58px',
+                  borderRadius: '29px',
+                  background: '#FFFFFF',
+                } : undefined}
+              >
+                {showMainTooltips ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        data-tool="blur"
+                        variant="ghost"
+                        size="sm"
+                        onClick={onBlur}
+                        className={`h-9 w-9 p-0 rounded-md transition-colors ${
+                          isBlurred
+                            ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
+                            : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
+                        }`}
+                      >
+                        <BlurIcon className="w-[18px] h-[18px]" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Blur</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Button
+                    data-tool="blur"
+                    variant="ghost"
+                    size="sm"
+                    onClick={onBlur}
+                    className={`h-9 w-9 p-0 rounded-md transition-colors ${
+                      isBlurred
+                        ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
+                        : "text-[#000000] hover:bg-[#FFF] active:bg-gray-200 [&_svg]:text-[#000000]"
+                    }`}
+                  >
+                    <BlurIcon className="w-[18px] h-[18px]" />
+                  </Button>
+                )}
+              </div>
             </div>
 
-            {/* Right Group: Export Options or Apply Crop - flex-1 + justify-end so right side balances left */}
+            {/* Right Group: Export Options or Apply Crop */}
             <div className="flex items-center flex-1 justify-end min-w-0">
               {showApplyCrop ? (
                 <Button
@@ -246,26 +305,39 @@ export default function ControlsRow({
                   Apply Crop
                 </Button>
               ) : (
-                <button
-                  onClick={handleDownloadClick}
-                  className="abb-gradient-hover-pill export-options-pill flex items-center gap-2"
-                  style={{
-                    height: '48px',
-                    paddingLeft: '16px',
-                    paddingRight: '16px',
-                    fontSize: '16px',
-                    fontWeight: 500,
-                  }}
+                <div
+                  data-tool-pill="export"
+                  className="flex items-center justify-center"
+                  style={walkthroughActive ? {
+                    height: '58px',
+                    borderRadius: '36px',
+                    background: '#FFFFFF',
+                    paddingLeft: '5px',
+                    paddingRight: '5px',
+                  } : undefined}
                 >
-                  <span className="text-[#000000]">Export options</span>
-                  <Image
-                    src="/export options.svg"
-                    alt="Export options"
-                    width={20}
-                    height={20}
-                    className="w-5 h-5"
-                  />
-                </button>
+                  <button
+                    data-tool="export"
+                    onClick={handleDownloadClick}
+                    className="abb-gradient-hover-pill export-options-pill flex items-center gap-2"
+                    style={{
+                      height: '48px',
+                      paddingLeft: '16px',
+                      paddingRight: '16px',
+                      fontSize: '16px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    <span className="text-[#000000]">Export options</span>
+                    <Image
+                      src="/export options.svg"
+                      alt="Export options"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
+                  </button>
+                </div>
               )}
             </div>
           </div>

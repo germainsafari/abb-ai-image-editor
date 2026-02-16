@@ -6,6 +6,8 @@ import { ChevronLeft } from "lucide-react"
 import Header from "@/components/header"
 import EditorCanvas, { CropHeaderInfo } from "@/components/editor/editor-canvas"
 import ControlsRow from "@/components/editor/controls-row"
+import UploadConfirmModal from "@/components/editor/upload-confirm-modal"
+import { HowItWorksButton, HowItWorksOverlay } from "@/components/editor/how-it-works"
 import type { ImageState, EditHistoryItem, EditorMode } from "@/types/editor"
 
 // Notification types
@@ -59,6 +61,9 @@ export default function EditorPage() {
   const [hasCropPresetSelected, setHasCropPresetSelected] = useState(false)
   const [cropHeaderInfo, setCropHeaderInfo] = useState<CropHeaderInfo>({ isActive: false })
   const [cropPopupVisible, setCropPopupVisible] = useState(true)
+
+  const [showUploadConfirm, setShowUploadConfirm] = useState(false)
+  const [showHowItWorks, setShowHowItWorks] = useState(false)
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -245,7 +250,11 @@ export default function EditorPage() {
 
   return (
     <div className="h-dvh bg-background flex flex-col overflow-hidden relative" style={{ minHeight: '500px' }}>
-      <Header />
+      <Header
+        showUploadButton
+        onUploadNewImage={() => setShowUploadConfirm(true)}
+        walkthroughActive={showHowItWorks}
+      />
 
       {/* Banner / crop-header: fixed min-height so image card stays stable when banner appears/disappears. */}
       <div className="flex-shrink-0 px-4 sm:px-6">
@@ -363,10 +372,37 @@ export default function EditorPage() {
           onAIEditApply={handleAIEditApply}
           imageState={imageState}
           hasCropPresetSelected={hasCropPresetSelected}
+          walkthroughActive={showHowItWorks}
         />
         {/* Spacer: on large monitors extra space goes below the control panel */}
         <div className="flex-1 min-h-0 flex-shrink-0" aria-hidden="true" />
       </main>
+
+      {/* How it works button - fixed bottom-right */}
+      <div
+        className={`fixed ${showHowItWorks ? 'z-[59]' : 'z-[56]'}`}
+        style={{ bottom: '24px', right: '24px' }}
+      >
+        <HowItWorksButton
+          isActive={showHowItWorks}
+          onToggle={() => setShowHowItWorks((prev) => !prev)}
+        />
+      </div>
+
+      {/* How it works overlay */}
+      {showHowItWorks && (
+        <HowItWorksOverlay onClose={() => setShowHowItWorks(false)} />
+      )}
+
+      {/* Upload confirm modal */}
+      <UploadConfirmModal
+        isOpen={showUploadConfirm}
+        onClose={() => setShowUploadConfirm(false)}
+        onConfirm={() => {
+          setShowUploadConfirm(false)
+          window.location.href = '/'
+        }}
+      />
     </div>
   )
 }
