@@ -40,6 +40,41 @@ interface UploadContentProps {
   hideWhileUploading?: boolean
 }
 
+async function gradeImageWithMicroservice(file: File) {
+  const baseUrl = process.env.NEXT_PUBLIC_GRADING_API_URL
+  if (!baseUrl) {
+    console.warn("NEXT_PUBLIC_GRADING_API_URL is not set; skipping grading microservice call.")
+    return null
+  }
+
+  const formData = new FormData()
+  formData.append("file", file)
+
+  const res = await fetch(
+    `${baseUrl}/api/grade?use_ai=true&use_contrast=true`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  )
+
+  if (!res.ok) {
+    console.error("Grading microservice call failed:", res.status, res.statusText)
+    return null
+  }
+
+  const matchedRef = res.headers.get("X-Matched-Reference")
+  const confidence = res.headers.get("X-Match-Confidence")
+  const blob = await res.blob()
+  const gradedUrl = URL.createObjectURL(blob)
+
+  return {
+    gradedUrl,
+    matchedRef,
+    confidence: confidence ? Number(confidence) : null,
+  }
+}
+
 // Reusable upload content component (can be used embedded or in modal)
 export function UploadContent({ onImageUploaded, containerWidth = "890px", onUploadStart, onLocalPreview, hideWhileUploading }: UploadContentProps) {
   const [isUploading, setIsUploading] = useState(false)
@@ -115,15 +150,40 @@ export function UploadContent({ onImageUploaded, containerWidth = "890px", onUpl
       if (!imageUrl) {
         throw new Error('No image URL returned from server')
       }
+      
+      let finalImageUrl = imageUrl
 
       try {
-        localStorage.setItem("lastUploadedImage", imageUrl)
+        const gradingResult = await gradeImageWithMicroservice(file)
+        if (gradingResult?.gradedUrl) {
+          finalImageUrl = gradingResult.gradedUrl
+
+          try {
+            if (gradingResult.matchedRef) {
+              localStorage.setItem("lastMatchedReference", gradingResult.matchedRef)
+            }
+            if (typeof gradingResult.confidence === "number") {
+              localStorage.setItem(
+                "lastMatchedReferenceConfidence",
+                gradingResult.confidence.toString(),
+              )
+            }
+          } catch (storageError) {
+            console.warn("Failed to store grading metadata in localStorage", storageError)
+          }
+        }
+      } catch (gradingError) {
+        console.error("Error calling grading microservice; falling back to original image URL.", gradingError)
+      }
+
+      try {
+        localStorage.setItem("lastUploadedImage", finalImageUrl)
         localStorage.setItem("lastUploadedFileName", data.fileName || file.name)
       } catch (storageError) {
         console.warn("Failed to store lastUploadedImage in localStorage", storageError)
       }
 
-      onImageUploaded(imageUrl)
+      onImageUploaded(finalImageUrl)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Upload failed. Please try again."
       setError(errorMessage)
