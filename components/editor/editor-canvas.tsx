@@ -105,17 +105,20 @@ export default function EditorCanvas({
     ]
 
     let controlsResizeObserver: ResizeObserver | null = null
+    let containerResizeObserver: ResizeObserver | null = null
     let cleanupScroll: (() => void) | null = null
     let cancelled = false
+    let rafId: number | null = null
 
     const findControlsEl = () =>
       controlsSelectors
         .map((s) => document.querySelector<HTMLElement>(s))
         .find((el): el is HTMLElement => Boolean(el)) || null
 
-    const attachControls = (controlsEl: HTMLElement) => {
-      const update = () => {
-        if (cancelled) return
+    const recalcOffset = () => {
+      if (cancelled) return
+      const controlsEl = findControlsEl()
+      if (controlsEl) {
         const rect = controlsEl.getBoundingClientRect()
         const fromBottom = Math.max(0, window.innerHeight - rect.top)
         if (Number.isFinite(fromBottom) && fromBottom >= 60) {
@@ -124,8 +127,11 @@ export default function EditorCanvas({
           setPopupBottomOffset(104)
         }
       }
-      update()
-      controlsResizeObserver = new ResizeObserver(update)
+    }
+
+    const attachControls = (controlsEl: HTMLElement) => {
+      recalcOffset()
+      controlsResizeObserver = new ResizeObserver(recalcOffset)
       controlsResizeObserver.observe(controlsEl)
     }
 
@@ -144,17 +150,33 @@ export default function EditorCanvas({
 
     tryAttach()
 
+    // Also observe the image card container for size changes.
+    // When the viewport changes (e.g. moving window between screens),
+    // dynamicMaxHeight updates and the image transitions to a new size.
+    // The controls bar moves as a result but its own ResizeObserver won't
+    // fire (only position changed, not size). Observing the container
+    // catches the image resize and lets us recalculate popup offset in sync.
+    const imageCard = document.querySelector<HTMLElement>("[data-editor-image-card]")
+    if (imageCard) {
+      containerResizeObserver = new ResizeObserver(() => {
+        if (cancelled) return
+        // Use rAF so we read layout after the browser has applied the resize
+        if (rafId !== null) cancelAnimationFrame(rafId)
+        rafId = requestAnimationFrame(recalcOffset)
+      })
+      containerResizeObserver.observe(imageCard)
+    }
+
     const onResize = () => {
       if (cancelled) return
-      const controlsEl = findControlsEl()
-      if (controlsEl) {
-        const rect = controlsEl.getBoundingClientRect()
-        const fromBottom = Math.max(0, window.innerHeight - rect.top)
-        if (Number.isFinite(fromBottom) && fromBottom >= 60) setPopupBottomOffset(fromBottom)
-        else setPopupBottomOffset(104)
-      }
+      // Immediate recalculation
+      recalcOffset()
+      // Delayed recalculations to catch CSS transitions (max-height 200ms)
+      // that shift the controls bar after the initial resize event
+      setTimeout(recalcOffset, 150)
+      setTimeout(recalcOffset, 350)
     }
-    const onScroll = () => onResize()
+    const onScroll = () => recalcOffset()
     window.addEventListener("resize", onResize)
     window.addEventListener("scroll", onScroll, true)
     cleanupScroll = () => {
@@ -165,7 +187,9 @@ export default function EditorCanvas({
     return () => {
       cancelled = true
       controlsResizeObserver?.disconnect()
+      containerResizeObserver?.disconnect()
       cleanupScroll?.()
+      if (rafId !== null) cancelAnimationFrame(rafId)
     }
   }, [])
 
@@ -295,6 +319,28 @@ export default function EditorCanvas({
       setCropInitialized(false)
     }
   }, [editorMode])
+
+  // Recenter the crop box when the viewport size changes (e.g. moving between screens).
+  // The crop overlay uses absolute pixel coordinates, so when the image container
+  // resizes the crop must be repositioned to stay aligned with the displayed image.
+  // We use viewport.width / viewport.height as the change signal instead of a
+  // ResizeObserver to avoid false triggers during normal user interactions.
+  const prevViewportRef = useRef({ w: viewport.width, h: viewport.height })
+  useEffect(() => {
+    const prev = prevViewportRef.current
+    const changed = prev.w !== viewport.width || prev.h !== viewport.height
+    prevViewportRef.current = { w: viewport.width, h: viewport.height }
+
+    if (!changed || editorMode !== "crop" || !cropInitialized) return
+
+    // Wait for the image's CSS max-height transition (200ms) to finish
+    // before recalculating crop position from the new image bounds.
+    const timer = setTimeout(() => {
+      const ratio = getActiveAspectRatio()
+      recenterCropForRatio(ratio)
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [viewport.width, viewport.height, editorMode, cropInitialized, getActiveAspectRatio, recenterCropForRatio])
 
   // Trigger blur animation when blur is activated
   useEffect(() => {
