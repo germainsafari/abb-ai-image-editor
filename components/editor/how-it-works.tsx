@@ -16,6 +16,10 @@ const TOOL_DESCRIPTIONS: Record<string, string> = {
     "Export your final image as PNG or JPG, add metadata, or upload directly to Media Bank.",
   "upload-new":
     "Start fresh by uploading a new image to edit from scratch.",
+  "abb-logo":
+    "Return to the ABB AI Image Editor start page to begin a new editing session.",
+  logout:
+    "Log out from the AI Image Editor and return to the login screen.",
 }
 
 interface CardPosition {
@@ -133,53 +137,12 @@ export function HowItWorksButton({ isActive, onToggle }: HowItWorksProps) {
 }
 
 const CARD_WIDTH = 240
-const CARD_GAP = 8
 const VIEWPORT_PAD = 12
 const ARROW_GAP = 14
 
-function resolveOverlaps(cards: CardPosition[], viewportWidth: number) {
-  if (cards.length === 0) return
-
-  cards.sort((a, b) => a.x - b.x)
-
-  for (let i = 1; i < cards.length; i++) {
-    const prevRight = cards[i - 1].x + CARD_WIDTH + CARD_GAP
-    if (cards[i].x < prevRight) {
-      cards[i].x = prevRight
-    }
-  }
-
-  const last = cards[cards.length - 1]
-  if (last.x + CARD_WIDTH > viewportWidth - VIEWPORT_PAD) {
-    const overflow = last.x + CARD_WIDTH - (viewportWidth - VIEWPORT_PAD)
-    for (let i = cards.length - 1; i >= 0; i--) {
-      cards[i].x -= overflow
-      if (i > 0) {
-        const prevRight = cards[i - 1].x + CARD_WIDTH + CARD_GAP
-        if (cards[i].x < prevRight) {
-          break
-        }
-      }
-    }
-
-    for (let i = cards.length - 2; i >= 0; i--) {
-      const nextLeft = cards[i + 1].x
-      if (cards[i].x + CARD_WIDTH + CARD_GAP > nextLeft) {
-        cards[i].x = nextLeft - CARD_WIDTH - CARD_GAP
-      }
-    }
-  }
-
-  if (cards[0].x < VIEWPORT_PAD) {
-    const shift = VIEWPORT_PAD - cards[0].x
-    for (const card of cards) {
-      card.x += shift
-    }
-  }
-}
-
 export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
   const [cards, setCards] = useState<CardPosition[]>([])
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   const calculatePositions = useCallback(() => {
     const vw = window.innerWidth
@@ -209,11 +172,13 @@ export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
 
     const undoRedo = groupCenter('[data-tool-pill="undo-redo"]', '[data-tool-pill="undo-redo"]')
     if (undoRedo) {
+      const xBase = undoRedo.cx - CARD_WIDTH / 2
+      const x = Math.max(VIEWPORT_PAD, Math.min(xBase, vw - CARD_WIDTH - VIEWPORT_PAD))
       bottomCards.push({
         id: "undo-redo",
         text: TOOL_DESCRIPTIONS["undo-redo"],
         anchorX: undoRedo.cx,
-        x: undoRedo.cx - CARD_WIDTH / 2,
+        x,
         y: undoRedo.top - ARROW_GAP,
         arrowDirection: "down",
       })
@@ -221,11 +186,13 @@ export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
 
     const crop = pillCenter('[data-tool-pill="crop"]')
     if (crop) {
+      const xBase = crop.cx - CARD_WIDTH / 2
+      const x = Math.max(VIEWPORT_PAD, Math.min(xBase, vw - CARD_WIDTH - VIEWPORT_PAD))
       bottomCards.push({
         id: "crop",
         text: TOOL_DESCRIPTIONS["crop"],
         anchorX: crop.cx,
-        x: crop.cx - CARD_WIDTH / 2,
+        x,
         y: crop.top - ARROW_GAP,
         arrowDirection: "down",
       })
@@ -233,11 +200,13 @@ export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
 
     const ai = pillCenter('[data-tool-pill="ai-edit"]')
     if (ai) {
+      const xBase = ai.cx - CARD_WIDTH / 2
+      const x = Math.max(VIEWPORT_PAD, Math.min(xBase, vw - CARD_WIDTH - VIEWPORT_PAD))
       bottomCards.push({
         id: "ai-edit",
         text: TOOL_DESCRIPTIONS["ai-edit"],
         anchorX: ai.cx,
-        x: ai.cx - CARD_WIDTH / 2,
+        x,
         y: ai.top - ARROW_GAP,
         arrowDirection: "down",
       })
@@ -245,11 +214,13 @@ export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
 
     const blur = pillCenter('[data-tool-pill="blur"]')
     if (blur) {
+      const xBase = blur.cx - CARD_WIDTH / 2
+      const x = Math.max(VIEWPORT_PAD, Math.min(xBase, vw - CARD_WIDTH - VIEWPORT_PAD))
       bottomCards.push({
         id: "blur",
         text: TOOL_DESCRIPTIONS["blur"],
         anchorX: blur.cx,
-        x: blur.cx - CARD_WIDTH / 2,
+        x,
         y: blur.top - ARROW_GAP,
         arrowDirection: "down",
       })
@@ -257,26 +228,56 @@ export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
 
     const exportPill = pillCenter('[data-tool-pill="export"]')
     if (exportPill) {
+      const xBase = exportPill.cx - CARD_WIDTH / 2
+      const x = Math.max(VIEWPORT_PAD, Math.min(xBase, vw - CARD_WIDTH - VIEWPORT_PAD))
       bottomCards.push({
         id: "export",
         text: TOOL_DESCRIPTIONS["export"],
         anchorX: exportPill.cx,
-        x: exportPill.cx - CARD_WIDTH / 2,
+        x,
         y: exportPill.top - ARROW_GAP,
         arrowDirection: "down",
       })
     }
 
-    resolveOverlaps(bottomCards, vw)
-
     const upload = pillCenter('[data-tool-pill="upload-new"]')
     if (upload) {
+      const xBase = upload.cx - CARD_WIDTH / 2
+      const x = Math.max(VIEWPORT_PAD, Math.min(xBase, vw - CARD_WIDTH - VIEWPORT_PAD))
       topCards.push({
         id: "upload-new",
         text: TOOL_DESCRIPTIONS["upload-new"],
         anchorX: upload.cx,
-        x: Math.min(upload.cx - CARD_WIDTH / 2, vw - CARD_WIDTH - VIEWPORT_PAD),
+        x,
         y: upload.bottom + ARROW_GAP,
+        arrowDirection: "up",
+      })
+    }
+
+    const abbLogo = pillCenter('[data-tool-pill="abb-logo"]')
+    if (abbLogo) {
+      const xBase = abbLogo.cx - CARD_WIDTH / 2
+      const x = Math.max(VIEWPORT_PAD, Math.min(xBase, vw - CARD_WIDTH - VIEWPORT_PAD))
+      topCards.push({
+        id: "abb-logo",
+        text: TOOL_DESCRIPTIONS["abb-logo"],
+        anchorX: abbLogo.cx,
+        x,
+        y: abbLogo.bottom + ARROW_GAP,
+        arrowDirection: "up",
+      })
+    }
+
+    const logout = pillCenter('[data-tool-pill="logout"]')
+    if (logout) {
+      const xBase = logout.cx - CARD_WIDTH / 2
+      const x = Math.max(VIEWPORT_PAD, Math.min(xBase, vw - CARD_WIDTH - VIEWPORT_PAD))
+      topCards.push({
+        id: "logout",
+        text: TOOL_DESCRIPTIONS["logout"],
+        anchorX: logout.cx,
+        x,
+        y: logout.bottom + ARROW_GAP,
         arrowDirection: "up",
       })
     }
@@ -290,6 +291,45 @@ export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener("resize", calculatePositions)
   }, [calculatePositions])
 
+  useEffect(() => {
+    const toolSelectors: Record<string, string> = {
+      "undo-redo": '[data-tool-pill="undo-redo"]',
+      crop: '[data-tool-pill="crop"]',
+      "ai-edit": '[data-tool-pill="ai-edit"]',
+      blur: '[data-tool-pill="blur"]',
+      export: '[data-tool-pill="export"]',
+      "upload-new": '[data-tool-pill="upload-new"]',
+      "abb-logo": '[data-tool-pill="abb-logo"]',
+      logout: '[data-tool-pill="logout"]',
+    }
+
+    const cleanups: Array<() => void> = []
+
+    Object.entries(toolSelectors).forEach(([id, selector]) => {
+      const el = document.querySelector(selector)
+      if (!el) return
+
+      const onEnter = () => setHoveredId(id)
+      const onLeave = () => {
+        setHoveredId((current) => (current === id ? null : current))
+      }
+
+      el.addEventListener("mouseenter", onEnter)
+      el.addEventListener("mouseleave", onLeave)
+
+      cleanups.push(() => {
+        el.removeEventListener("mouseenter", onEnter)
+        el.removeEventListener("mouseleave", onLeave)
+      })
+    })
+
+    return () => {
+      cleanups.forEach((fn) => fn())
+    }
+  }, [])
+
+  const visibleCards = hoveredId ? cards.filter((card) => card.id === hoveredId) : []
+
   return (
     <>
       {/* Dark overlay — z-55 */}
@@ -300,7 +340,7 @@ export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
       />
 
       {/* Annotation cards — z-58 (above toolbar at z-57) */}
-      {cards.map((card) => {
+      {visibleCards.map((card) => {
         const arrowLeft = card.anchorX - card.x
 
         return (

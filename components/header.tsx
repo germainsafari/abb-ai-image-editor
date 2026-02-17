@@ -20,7 +20,6 @@ export default function Header({ onUploadNewImage, showUploadButton = false, wal
       style={{
         paddingLeft: "var(--Spacing-Grid-margin, 48px)",
         paddingRight: "var(--Spacing-Grid-margin, 48px)",
-        ...(walkthroughActive ? { pointerEvents: 'none' as const } : {}),
       }}
     >
       <div className="h-full w-full flex items-center justify-between">
@@ -35,7 +34,11 @@ export default function Header({ onUploadNewImage, showUploadButton = false, wal
             background: '#FFFFFF',
           } : undefined}
         >
-          <Link href="/" className="flex items-center flex-shrink-0">
+          <Link
+            href="/"
+            className="flex items-center flex-shrink-0"
+            onClick={walkthroughActive ? (e) => e.preventDefault() : undefined}
+          >
             <svg width="72" height="30" viewBox="0 0 64 25" fill="none" xmlns="http://www.w3.org/2000/svg">
               <mask
                 id="mask0"
@@ -192,6 +195,7 @@ export default function Header({ onUploadNewImage, showUploadButton = false, wal
               type="button"
               className="h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center hover:bg-transparent focus:outline-none focus-visible:outline-none"
               aria-label="Logout"
+              disabled={walkthroughActive}
             >
               <Image 
                 src="/navbar Icon on the top right corner.svg" 

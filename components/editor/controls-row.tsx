@@ -46,8 +46,9 @@ export default function ControlsRow({
 
   const isCropMode = editorMode === "crop"
   const isAIEditMode = editorMode === "ai-edit" || editorMode === "ai-result"
-  // When crop or AI edit panel is open, hide tooltips so they don't overlap the popup; hover only changes bg
-  const showMainTooltips = !isCropMode && !isAIEditMode
+  const isGuidedWalkthrough = walkthroughActive
+  // When crop or AI edit panel is open, or guided walkthrough is active, hide tooltips so they don't overlap other UI
+  const showMainTooltips = !isCropMode && !isAIEditMode && !isGuidedWalkthrough
 
   const showApplyCrop = isCropMode && hasCropPresetSelected
 
@@ -88,7 +89,6 @@ export default function ControlsRow({
             style={{
               height: "64px",
               padding: "8px 12px",
-              ...(walkthroughActive ? { pointerEvents: 'none' as const } : {}),
             }}
           >
             {/* Left Group: Undo/Redo */}
@@ -104,41 +104,64 @@ export default function ControlsRow({
                   gap: '2px',
                 } : { gap: '2px' }}
               >
-                <Tooltip>
-                  <TooltipTrigger asChild>
+                {isGuidedWalkthrough ? (
+                  <>
                     <Button
                       data-tool="undo"
                       variant="ghost"
                       size="sm"
-                      onClick={onUndo}
-                      disabled={!canUndo}
-                      className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 cursor-not-allowed transition-colors"
                     >
                       <Image src="/undo.svg" alt="Undo" width={18} height={18} className="w-[18px] h-[18px]" />
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Undo</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
                     <Button
                       data-tool="redo"
                       variant="ghost"
                       size="sm"
-                      onClick={onRedo}
-                      disabled={!canRedo}
-                      className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 cursor-not-allowed transition-colors"
                     >
                       <Image src="/redo.svg" alt="Redo" width={18} height={18} className="w-[18px] h-[18px]" />
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Redo</p>
-                  </TooltipContent>
-                </Tooltip>
+                  </>
+                ) : (
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          data-tool="undo"
+                          variant="ghost"
+                          size="sm"
+                          onClick={onUndo}
+                          disabled={!canUndo}
+                          className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <Image src="/undo.svg" alt="Undo" width={18} height={18} className="w-[18px] h-[18px]" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Undo</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          data-tool="redo"
+                          variant="ghost"
+                          size="sm"
+                          onClick={onRedo}
+                          disabled={!canRedo}
+                          className="h-9 w-9 p-0 rounded-md text-[#000000] hover:bg-[#FFF] active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <Image src="/redo.svg" alt="Redo" width={18} height={18} className="w-[18px] h-[18px]" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Redo</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </>
+                )}
               </div>
             </div>
 
@@ -181,7 +204,7 @@ export default function ControlsRow({
                     data-tool="crop"
                     variant="ghost"
                     size="sm"
-                    onClick={() => onModeChange(isCropMode ? "view" : "crop")}
+                    onClick={isGuidedWalkthrough ? undefined : () => onModeChange(isCropMode ? "view" : "crop")}
                     className={`h-9 w-9 p-0 rounded-md transition-colors ${
                       isCropMode
                         ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
@@ -230,7 +253,7 @@ export default function ControlsRow({
                     data-tool="ai-edit"
                     variant="ghost"
                     size="sm"
-                    onClick={() => onModeChange(isAIEditMode ? "view" : "ai-edit")}
+                    onClick={isGuidedWalkthrough ? undefined : () => onModeChange(isAIEditMode ? "view" : "ai-edit")}
                     className={`h-9 w-9 p-0 rounded-md transition-colors ${
                       isAIEditMode
                         ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
@@ -279,7 +302,7 @@ export default function ControlsRow({
                     data-tool="blur"
                     variant="ghost"
                     size="sm"
-                    onClick={onBlur}
+                    onClick={isGuidedWalkthrough ? undefined : onBlur}
                     className={`h-9 w-9 p-0 rounded-md transition-colors ${
                       isBlurred
                         ? "bg-[#6764F6] hover:bg-[#6764F6] active:bg-[#6764F6] text-white [&_svg]:text-white"
@@ -318,7 +341,7 @@ export default function ControlsRow({
                 >
                   <button
                     data-tool="export"
-                    onClick={handleDownloadClick}
+                    onClick={isGuidedWalkthrough ? undefined : handleDownloadClick}
                     className="abb-gradient-hover-pill export-options-pill flex items-center gap-2"
                     style={{
                       height: '48px',
