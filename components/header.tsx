@@ -145,40 +145,34 @@ export default function Header({ onUploadNewImage, showUploadButton = false, wal
                 height: '58px',
                 borderRadius: '36px',
                 background: '#FFFFFF',
-                paddingLeft: '8px',
-                paddingRight: '8px',
+                paddingLeft: '16px',
+                paddingRight: '16px',
               } : undefined}
             >
               <button
                 data-tool="upload-new"
                 onClick={onUploadNewImage}
-                className="abb-gradient-hover-pill flex items-center"
+                className="flex items-center"
                 style={{
-                  height: '40px',
-                  paddingLeft: '16px',
-                  paddingRight: '20px',
-                  gap: '8px',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  color: 'var(--Shades-Grey-90, var(--Colour-Shades-Grey-grey-90, #1F1F1F))',
+                  fontFamily: 'var(--font-abb-voice)',
+                  fontSize: '16px',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  lineHeight: '100%',
+                  textDecorationLine: 'underline',
+                  textDecorationStyle: 'solid' as const,
+                  textDecorationSkipInk: 'auto' as const,
+                  textDecorationThickness: 'auto',
+                  textUnderlineOffset: 'auto',
+                  textUnderlinePosition: 'from-font' as const,
                 }}
               >
-                <Image
-                  src="/upload new image icon.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="w-5 h-5"
-                />
-                <span
-                  style={{
-                    color: 'var(--Shades-Grey-90, #1F1F1F)',
-                    fontFamily: 'var(--font-abb-voice)',
-                    fontSize: '16px',
-                    fontStyle: 'normal',
-                    fontWeight: 500,
-                    lineHeight: '100%',
-                  }}
-                >
-                  Upload new image
-                </span>
+                Upload new image
               </button>
             </div>
           )}

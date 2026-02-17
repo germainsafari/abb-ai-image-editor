@@ -358,36 +358,43 @@ export default function EditorPage() {
           onCropPopupVisibleChange={setCropPopupVisible}
         />
 
-        {/* Controls Row - 24px below image card on all devices */}
-        <ControlsRow
-          canUndo={historyIndex > 0}
-          canRedo={historyIndex < editHistory.length - 1}
-          isBlurred={imageState.isBlurred}
-          editorMode={editorMode}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          onBlur={handleBlur}
-          onModeChange={handleModeChange}
-          onCropApply={handleCropApply}
-          onAIEditApply={handleAIEditApply}
-          imageState={imageState}
-          hasCropPresetSelected={hasCropPresetSelected}
-          walkthroughActive={showHowItWorks}
-        />
+        {/* Controls Row + How It Works button on same horizontal level */}
+        <div className="relative flex-shrink-0">
+          <ControlsRow
+            canUndo={historyIndex > 0}
+            canRedo={historyIndex < editHistory.length - 1}
+            isBlurred={imageState.isBlurred}
+            editorMode={editorMode}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            onBlur={handleBlur}
+            onModeChange={handleModeChange}
+            onCropApply={handleCropApply}
+            onAIEditApply={handleAIEditApply}
+            imageState={imageState}
+            hasCropPresetSelected={hasCropPresetSelected}
+            walkthroughActive={showHowItWorks}
+          />
+          {/* How it works button - same horizontal level as control panel */}
+          <div
+            className={`absolute ${showHowItWorks ? 'z-[59]' : 'z-[56]'}`}
+            style={{
+              top: '24px',
+              right: '24px',
+              height: '64px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <HowItWorksButton
+              isActive={showHowItWorks}
+              onToggle={() => setShowHowItWorks((prev) => !prev)}
+            />
+          </div>
+        </div>
         {/* Spacer: on large monitors extra space goes below the control panel */}
         <div className="flex-1 min-h-0 flex-shrink-0" aria-hidden="true" />
       </main>
-
-      {/* How it works button - fixed bottom-right */}
-      <div
-        className={`fixed ${showHowItWorks ? 'z-[59]' : 'z-[56]'}`}
-        style={{ bottom: '24px', right: '24px' }}
-      >
-        <HowItWorksButton
-          isActive={showHowItWorks}
-          onToggle={() => setShowHowItWorks((prev) => !prev)}
-        />
-      </div>
 
       {/* How it works overlay */}
       {showHowItWorks && (
