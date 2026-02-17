@@ -154,7 +154,7 @@ export default function Header({ onUploadNewImage, showUploadButton = false, wal
             >
               <button
                 data-tool="upload-new"
-                onClick={onUploadNewImage}
+                onClick={walkthroughActive ? undefined : onUploadNewImage}
                 className="flex items-center"
                 style={{
                   background: 'none',
