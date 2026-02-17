@@ -12,15 +12,22 @@ export default function UploadConfirmModal({ isOpen, onClose, onConfirm }: Uploa
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 sm:p-5 lg:p-6">
       <div
-        className="bg-white flex flex-col w-full max-w-[600px] overflow-hidden"
+        className="bg-white flex flex-col overflow-hidden"
         style={{
+          width: "800px",
+          maxWidth: "calc(100vw - 32px)",
           borderRadius: '8px',
+          background: "#FFF",
           boxShadow: '0 0 58.2px 0 rgba(0, 0, 0, 0.25)',
         }}
       >
         <div
           className="flex flex-col overflow-auto"
-          style={{ padding: '56px 40px', gap: '24px' }}
+          style={{
+            padding: "48px 40px",
+            gap: "48px",
+            alignItems: "flex-start",
+          }}
         >
           <h2
             className="text-black"
@@ -31,7 +38,9 @@ export default function UploadConfirmModal({ isOpen, onClose, onConfirm }: Uploa
               lineHeight: '120%',
             }}
           >
-            WOULD YOU LIKE TO START AGAIN?
+            WOULD YOU LIKE TO START
+            <br />
+            AGAIN?
           </h2>
 
           <p
@@ -41,13 +50,15 @@ export default function UploadConfirmModal({ isOpen, onClose, onConfirm }: Uploa
               fontWeight: 400,
               lineHeight: '150%',
               color: '#1F1F1F',
+              alignSelf: "stretch",
             }}
           >
-            Continue editing your current image, or go back to the start of the editor
-            to upload a new one. Choosing to upload a new image will take you to the intro page.
+            Continue editing your current image, or go back to the start of the editor to upload a new one.
+            <br />
+            Choosing to upload a new image will take you to the intro page.
           </p>
 
-          <div className="flex items-center justify-between pt-4">
+          <div className="flex items-center justify-between self-stretch">
             <button
               onClick={onClose}
               className="abb-gradient-hover-pill"
