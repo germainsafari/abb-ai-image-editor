@@ -64,6 +64,8 @@ export default function EditorPage() {
 
   const [showUploadConfirm, setShowUploadConfirm] = useState(false)
   const [showHowItWorks, setShowHowItWorks] = useState(false)
+  const [walkthroughPreviousMode, setWalkthroughPreviousMode] = useState<EditorMode | null>(null)
+  const [walkthroughPreviousCropPopupVisible, setWalkthroughPreviousCropPopupVisible] = useState<boolean | null>(null)
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -223,6 +225,37 @@ export default function EditorPage() {
       setCropPopupVisible(true)
     }
   }, [imageState, addToHistory])
+
+  const enterHowItWorks = () => {
+    if (showHowItWorks) return
+
+    setWalkthroughPreviousMode(editorMode)
+    setWalkthroughPreviousCropPopupVisible(cropPopupVisible)
+
+    if (editorMode === "crop" || editorMode === "ai-edit") {
+      setEditorMode("view")
+    }
+
+    if (cropPopupVisible) {
+      setCropPopupVisible(false)
+    }
+
+    setShowHowItWorks(true)
+  }
+
+  const exitHowItWorks = () => {
+    if (!showHowItWorks) return
+
+    setShowHowItWorks(false)
+
+    if (walkthroughPreviousMode && walkthroughPreviousMode !== editorMode) {
+      setEditorMode(walkthroughPreviousMode)
+    }
+
+    if (walkthroughPreviousMode === "crop" && walkthroughPreviousCropPopupVisible) {
+      setCropPopupVisible(true)
+    }
+  }
 
   const hasAnyBanner = activeNotification !== null
 
@@ -388,7 +421,7 @@ export default function EditorPage() {
           >
             <HowItWorksButton
               isActive={showHowItWorks}
-              onToggle={() => setShowHowItWorks((prev) => !prev)}
+              onToggle={showHowItWorks ? exitHowItWorks : enterHowItWorks}
             />
           </div>
         </div>
@@ -398,7 +431,7 @@ export default function EditorPage() {
 
       {/* How it works overlay */}
       {showHowItWorks && (
-        <HowItWorksOverlay onClose={() => setShowHowItWorks(false)} />
+        <HowItWorksOverlay onClose={exitHowItWorks} />
       )}
 
       {/* Upload confirm modal */}

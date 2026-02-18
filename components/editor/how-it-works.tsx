@@ -11,13 +11,11 @@ const TOOL_DESCRIPTIONS: Record<string, string> = {
   "ai-edit":
     "Use AI to transform the scene or background while keeping the main subject intact.",
   blur:
-    "Apply a blur effect to the entire image for privacy or content protection.",
+    "Apply a blur effect to the entire image.",
   export:
     "Export your final image as PNG or JPG, add metadata, or upload directly to Media Bank.",
   "upload-new":
     "Start fresh by uploading a new image to edit from scratch.",
-  "abb-logo":
-    "Return to the ABB AI Image Editor start page to begin a new editing session.",
   logout:
     "Log out from the AI Image Editor and return to the login screen.",
 }
@@ -254,20 +252,6 @@ export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
       })
     }
 
-    const abbLogo = pillCenter('[data-tool-pill="abb-logo"]')
-    if (abbLogo) {
-      const xBase = abbLogo.cx - CARD_WIDTH / 2
-      const x = Math.max(VIEWPORT_PAD, Math.min(xBase, vw - CARD_WIDTH - VIEWPORT_PAD))
-      topCards.push({
-        id: "abb-logo",
-        text: TOOL_DESCRIPTIONS["abb-logo"],
-        anchorX: abbLogo.cx,
-        x,
-        y: abbLogo.bottom + ARROW_GAP,
-        arrowDirection: "up",
-      })
-    }
-
     const logout = pillCenter('[data-tool-pill="logout"]')
     if (logout) {
       const xBase = logout.cx - CARD_WIDTH / 2
@@ -299,7 +283,6 @@ export function HowItWorksOverlay({ onClose }: { onClose: () => void }) {
       blur: '[data-tool-pill="blur"]',
       export: '[data-tool-pill="export"]',
       "upload-new": '[data-tool-pill="upload-new"]',
-      "abb-logo": '[data-tool-pill="abb-logo"]',
       logout: '[data-tool-pill="logout"]',
     }
 

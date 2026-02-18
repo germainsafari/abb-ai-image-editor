@@ -1,5 +1,7 @@
 "use client"
 
+import { createPortal } from "react-dom"
+
 interface UploadConfirmModalProps {
   isOpen: boolean
   onClose: () => void
@@ -9,16 +11,18 @@ interface UploadConfirmModalProps {
 export default function UploadConfirmModal({ isOpen, onClose, onConfirm }: UploadConfirmModalProps) {
   if (!isOpen) return null
 
-  return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 sm:p-5 lg:p-6">
+  if (typeof document === "undefined") return null
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center p-4 sm:p-5 lg:p-6">
       <div
         className="bg-white flex flex-col overflow-hidden"
         style={{
           width: "800px",
           maxWidth: "calc(100vw - 32px)",
-          borderRadius: '8px',
+          borderRadius: "8px",
           background: "#FFF",
-          boxShadow: '0 0 58.2px 0 rgba(0, 0, 0, 0.25)',
+          boxShadow: "0 0 58.2px 0 rgba(0, 0, 0, 0.25)",
         }}
       >
         <div
@@ -32,10 +36,10 @@ export default function UploadConfirmModal({ isOpen, onClose, onConfirm }: Uploa
           <h2
             className="text-black"
             style={{
-              fontFamily: 'var(--font-abb-voice-display)',
-              fontSize: '32px',
+              fontFamily: "var(--font-abb-voice-display)",
+              fontSize: "32px",
               fontWeight: 700,
-              lineHeight: '120%',
+              lineHeight: "120%",
             }}
           >
             WOULD YOU LIKE TO START
@@ -45,11 +49,11 @@ export default function UploadConfirmModal({ isOpen, onClose, onConfirm }: Uploa
 
           <p
             style={{
-              fontFamily: 'var(--font-abb-voice)',
-              fontSize: '16px',
+              fontFamily: "var(--font-abb-voice)",
+              fontSize: "16px",
               fontWeight: 400,
-              lineHeight: '150%',
-              color: '#1F1F1F',
+              lineHeight: "150%",
+              color: "#1F1F1F",
               alignSelf: "stretch",
             }}
           >
@@ -63,10 +67,10 @@ export default function UploadConfirmModal({ isOpen, onClose, onConfirm }: Uploa
               onClick={onClose}
               className="abb-gradient-hover-pill"
               style={{
-                height: '48px',
-                paddingLeft: '24px',
-                paddingRight: '24px',
-                fontSize: '16px',
+                height: "48px",
+                paddingLeft: "24px",
+                paddingRight: "24px",
+                fontSize: "16px",
                 fontWeight: 500,
               }}
             >
@@ -76,12 +80,12 @@ export default function UploadConfirmModal({ isOpen, onClose, onConfirm }: Uploa
               onClick={onConfirm}
               className="abb-red-button-gradient-hover text-white"
               style={{
-                backgroundColor: '#FF000F',
-                height: '48px',
-                borderRadius: '28px',
-                paddingLeft: '24px',
-                paddingRight: '24px',
-                fontSize: '16px',
+                backgroundColor: "#FF000F",
+                height: "48px",
+                borderRadius: "28px",
+                paddingLeft: "24px",
+                paddingRight: "24px",
+                fontSize: "16px",
                 fontWeight: 500,
               }}
             >
@@ -90,6 +94,7 @@ export default function UploadConfirmModal({ isOpen, onClose, onConfirm }: Uploa
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
