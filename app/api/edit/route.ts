@@ -96,7 +96,17 @@ async function callFluxAPI(
       if (response.status === 401) {
         throw new Error("Invalid API key. Please check your FLUX_KONTEXT_API_KEY.")
       }
-      throw new Error(errorData.message || `Flux API error: ${response.status}`)
+      if (response.status === 429) {
+        throw new Error("Too many requests. Please wait a moment and try again.")
+      }
+      if (response.status >= 500) {
+        throw new Error(
+          "The AI service is temporarily unavailable. Please try again in a few moments."
+        )
+      }
+      throw new Error(
+        errorData.message || "Something went wrong while processing your request. Please try again."
+      )
     }
 
     const data = await response.json()
@@ -124,32 +134,61 @@ async function callFluxAPI(
 }
 
 async function pollForResult(taskId: string, apiKey: string): Promise<string> {
-  const maxAttempts = 60
+  const maxAttempts = 90
   const pollInterval = 2000
+  let consecutiveFailures = 0
+  const maxConsecutiveFailures = 10
 
   for (let i = 0; i < maxAttempts; i++) {
     await new Promise((resolve) => setTimeout(resolve, pollInterval))
 
-    const response = await fetch(`https://api.bfl.ai/v1/get_result?id=${taskId}`, {
-      headers: {
-        "X-Key": apiKey,
-      },
-    })
+    try {
+      const response = await fetch(`https://api.bfl.ai/v1/get_result?id=${taskId}`, {
+        headers: {
+          "X-Key": apiKey,
+        },
+      })
 
-    if (!response.ok) continue
+      if (!response.ok) {
+        consecutiveFailures++
+        if (consecutiveFailures >= maxConsecutiveFailures) {
+          throw new Error(
+            "The AI service is not responding. Please try again later."
+          )
+        }
+        continue
+      }
 
-    const data = await response.json()
+      consecutiveFailures = 0
+      const data = await response.json()
 
-    if (data.status === "Ready" && data.result?.sample) {
-      return data.result.sample
-    }
+      if (data.status === "Ready" && data.result?.sample) {
+        return data.result.sample
+      }
 
-    if (data.status === "Error") {
-      throw new Error(data.error || "Image generation failed")
+      if (data.status === "Error") {
+        const msg = data.error || ""
+        if (msg.toLowerCase().includes("content") || msg.toLowerCase().includes("safety")) {
+          throw new Error(
+            "Your request could not be completed due to content restrictions. Please try a different prompt."
+          )
+        }
+        throw new Error("Image generation failed. Please try a different prompt or try again.")
+      }
+    } catch (error: any) {
+      if (error.message && !error.message.includes("not responding")) {
+        throw error
+      }
+      consecutiveFailures++
+      if (consecutiveFailures >= maxConsecutiveFailures) {
+        throw error
+      }
     }
   }
 
-  throw new Error("Generation timed out. Please try again.")
+  throw new Error(
+    "Generation is taking longer than expected. Please try again — complex prompts may need a second attempt."
+  )
 }
 
 // Upload the result image to Azure to avoid CORS issues with BFL CDN

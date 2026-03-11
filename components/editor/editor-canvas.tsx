@@ -993,12 +993,29 @@ export default function EditorCanvas({
         onModeChange("ai-result")
       }
     } catch (error: unknown) {
-      // Don't show error if it was aborted
       if (error instanceof Error && error.name === "AbortError") {
         return
       }
-      const errorMessage = error instanceof Error ? error.message : "Failed to generate. Please try again."
-      setAiError(errorMessage)
+      const raw = error instanceof Error ? error.message : ""
+      let friendlyMessage: string
+      if (raw.includes("timed out") || raw.includes("taking longer")) {
+        friendlyMessage = "Generation is taking longer than expected. Please try again."
+      } else if (raw.includes("temporarily unavailable") || raw.includes("not responding")) {
+        friendlyMessage = "The AI service is temporarily unavailable. Please try again in a moment."
+      } else if (raw.includes("credits") || raw.includes("quota")) {
+        friendlyMessage = "Insufficient credits. Please upgrade your plan or try again later."
+      } else if (raw.includes("content restrictions")) {
+        friendlyMessage = "This prompt couldn't be processed due to content restrictions. Try a different prompt."
+      } else if (raw.includes("API key")) {
+        friendlyMessage = "Configuration error. Please contact the administrator."
+      } else if (raw.includes("network") || raw.includes("Network") || raw.includes("fetch")) {
+        friendlyMessage = "Network error. Please check your connection and try again."
+      } else if (raw) {
+        friendlyMessage = raw
+      } else {
+        friendlyMessage = "Something went wrong. Please try again."
+      }
+      setAiError(friendlyMessage)
     } finally {
       setIsGenerating(false)
       abortControllerRef.current = null
@@ -1271,7 +1288,49 @@ export default function EditorCanvas({
                   </button>
                 </div>
 
-                {aiError && <div className="mt-3 p-2 bg-red-50 text-red-600 text-sm rounded-lg">{aiError}</div>}
+                {aiError && (
+                  <div
+                    className="mt-3 flex items-start gap-2.5 rounded-xl px-4 py-3 animate-in fade-in-0 slide-in-from-top-1 duration-200"
+                    style={{
+                      background: "#FFF5F5",
+                      border: "1px solid #FECACA",
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      className="flex-shrink-0 mt-px"
+                    >
+                      <path
+                        d="M10 6v4m0 4h.01M19 10a9 9 0 11-18 0 9 9 0 0118 0z"
+                        stroke="#DC2626"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <span className="text-sm leading-snug flex-1" style={{ color: "#991B1B" }}>
+                      {aiError}
+                    </span>
+                    <button
+                      onClick={() => setAiError(null)}
+                      className="flex-shrink-0 mt-px rounded-full p-0.5 hover:bg-red-100 transition-colors"
+                      aria-label="Dismiss error"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path
+                          d="M12 4L4 12M4 4l8 8"
+                          stroke="#991B1B"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>,
