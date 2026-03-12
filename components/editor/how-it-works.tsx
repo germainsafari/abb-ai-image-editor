@@ -73,7 +73,7 @@ export function HowItWorksButton({ isActive, onToggle }: HowItWorksProps) {
     <div className="relative">
       {isHovered && !isActive && (
         <div
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap pointer-events-none"
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap pointer-events-none"
           style={{
             background: '#1F1F1F',
             color: '#FFFFFF',
@@ -87,13 +87,13 @@ export function HowItWorksButton({ isActive, onToggle }: HowItWorksProps) {
         >
           How it works
           <div
-            className="absolute top-full left-1/2 -translate-x-1/2"
+            className="absolute bottom-full left-1/2 -translate-x-1/2"
             style={{
               width: 0,
               height: 0,
               borderLeft: '6px solid transparent',
               borderRight: '6px solid transparent',
-              borderTop: '6px solid #1F1F1F',
+              borderBottom: '6px solid #1F1F1F',
             }}
           />
         </div>

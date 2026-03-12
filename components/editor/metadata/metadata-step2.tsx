@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { ChevronLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -43,10 +44,31 @@ export default function MetadataStep2({
   onApply,
   onBack,
 }: MetadataStep2Props) {
-  // When image was AI-edited in-system (e.g. Flux change scene), "AI generated" is a fixed tag and cannot be removed
+  const [duplicateTooltip, setDuplicateTooltip] = useState(false)
+
+  useEffect(() => {
+    if (!duplicateTooltip) return
+    const timer = setTimeout(() => setDuplicateTooltip(false), 2500)
+    return () => clearTimeout(timer)
+  }, [duplicateTooltip])
+
   const displayTags = imageState.isAIGenerated
     ? ["AI generated", ...metadata.tags.filter((t) => t !== "AI generated")]
     : metadata.tags
+
+  const handleAddTag = () => {
+    const trimmed = newTag.trim()
+    if (!trimmed) return
+    const allTags = imageState.isAIGenerated
+      ? ["AI generated", ...metadata.tags]
+      : metadata.tags
+    if (allTags.some((t) => t.toLowerCase() === trimmed.toLowerCase())) {
+      setDuplicateTooltip(true)
+      return
+    }
+    setDuplicateTooltip(false)
+    onAddTag()
+  }
 
   const removeTag = (tag: string) => {
     if (imageState.isAIGenerated && tag === "AI generated") return
@@ -130,17 +152,20 @@ export default function MetadataStep2({
 
           <div className="flex-shrink-0">
             <label className="flex items-center gap-1 text-sm font-medium mb-2 block">Add your tags</label>
-            <div className="flex gap-2">
+            <div className="relative flex gap-2">
               <Input
                 type="text"
                 value={newTag}
-                onChange={(e) => onNewTagChange(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onAddTag()}
+                onChange={(e) => {
+                  onNewTagChange(e.target.value)
+                  if (duplicateTooltip) setDuplicateTooltip(false)
+                }}
+                onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
                 placeholder="Type here..."
                 className="flex-1 min-w-0 h-auto py-[10px] px-3 rounded-lg border border-[var(--ABB-Black)] bg-[var(--Primary-White)] text-foreground placeholder:text-muted-foreground focus-visible:border-[var(--ABB-Lilac,#6764F6)] focus-visible:ring-2 focus-visible:ring-[var(--ABB-Lilac,#6764F6)]/20 focus-visible:ring-offset-0 selection:bg-[var(--ABB-Black)] selection:text-[var(--Primary-White)] text-sm"
               />
               <button 
-                onClick={onAddTag} 
+                onClick={handleAddTag} 
                 className="abb-gradient-hover-pill"
                 style={{
                   height: '40px',
@@ -152,6 +177,35 @@ export default function MetadataStep2({
               >
                 Add
               </button>
+
+              {duplicateTooltip && (
+                <div
+                  className="absolute right-0 bottom-full mb-2 pointer-events-none animate-in fade-in-0 slide-in-from-bottom-1 duration-150"
+                  style={{
+                    background: '#1F1F1F',
+                    color: '#FFFFFF',
+                    fontFamily: 'var(--font-abb-voice)',
+                    fontSize: '13px',
+                    fontWeight: 400,
+                    lineHeight: '140%',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  This tag has already been added.
+                  <div
+                    className="absolute top-full right-6"
+                    style={{
+                      width: 0,
+                      height: 0,
+                      borderLeft: '6px solid transparent',
+                      borderRight: '6px solid transparent',
+                      borderTop: '6px solid #1F1F1F',
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

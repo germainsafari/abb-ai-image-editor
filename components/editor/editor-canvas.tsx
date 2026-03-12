@@ -1438,7 +1438,7 @@ export default function EditorCanvas({
                       fontWeight: 500,
                       fontSize: '12px',
                       lineHeight: '100%',
-                      height: '48px',
+                      height: '40px',
                       paddingLeft: '16px',
                       paddingRight: '16px',
                     }}
@@ -1453,7 +1453,7 @@ export default function EditorCanvas({
                       fontWeight: 500,
                       fontSize: '12px',
                       lineHeight: '100%',
-                      height: '48px',
+                      height: '40px',
                       borderRadius: '28px',
                     }}
                   >

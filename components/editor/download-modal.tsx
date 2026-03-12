@@ -723,11 +723,11 @@ export default function DownloadModal({ isOpen, imageState, onClose, skipToDownl
         }}
       >
         <div
-          className="flex flex-col flex-1 min-h-0 overflow-auto"
+          className={`flex flex-col flex-1 min-h-0 ${isMetadataStep || step === 'download' ? '' : 'overflow-auto'}`}
           style={{
             paddingTop: isMetadataStep ? '0' : '56px',
             paddingRight: isMetadataStep ? '0' : '40px',
-            paddingBottom: isMetadataStep ? '0' : '56px',
+            paddingBottom: isMetadataStep ? '0' : step === 'download' ? '40px' : '56px',
             paddingLeft: isMetadataStep ? '0' : '40px',
           }}
         >

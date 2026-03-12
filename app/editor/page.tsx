@@ -287,6 +287,12 @@ export default function EditorPage() {
         showUploadButton
         onUploadNewImage={() => setShowUploadConfirm(true)}
         walkthroughActive={showHowItWorks}
+        howItWorksButton={
+          <HowItWorksButton
+            isActive={showHowItWorks}
+            onToggle={showHowItWorks ? exitHowItWorks : enterHowItWorks}
+          />
+        }
       />
 
       {/* Banner / crop-header: fixed min-height so image card stays stable when banner appears/disappears. */}
@@ -408,22 +414,6 @@ export default function EditorPage() {
             hasCropPresetSelected={hasCropPresetSelected}
             walkthroughActive={showHowItWorks}
           />
-          {/* How it works button - same horizontal level as control panel */}
-          <div
-            className={`absolute ${showHowItWorks ? 'z-[59]' : 'z-[56]'}`}
-            style={{
-              top: '24px',
-              right: '24px',
-              height: '64px',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <HowItWorksButton
-              isActive={showHowItWorks}
-              onToggle={showHowItWorks ? exitHowItWorks : enterHowItWorks}
-            />
-          </div>
         </div>
         {/* Spacer: on large monitors extra space goes below the control panel */}
         <div className="flex-1 min-h-0 flex-shrink-0" aria-hidden="true" />

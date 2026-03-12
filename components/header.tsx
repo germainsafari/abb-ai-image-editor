@@ -7,9 +7,10 @@ interface HeaderProps {
   onUploadNewImage?: () => void
   showUploadButton?: boolean
   walkthroughActive?: boolean
+  howItWorksButton?: React.ReactNode
 }
 
-export default function Header({ onUploadNewImage, showUploadButton = false, walkthroughActive = false }: HeaderProps) {
+export default function Header({ onUploadNewImage, showUploadButton = false, walkthroughActive = false, howItWorksButton }: HeaderProps) {
   return (
     <header
       className={`h-[72px] w-full sticky top-0 flex-shrink-0 flex items-center ${
@@ -206,6 +207,12 @@ export default function Header({ onUploadNewImage, showUploadButton = false, wal
               />
             </button>
           </div>
+
+          {howItWorksButton && (
+            <div className={walkthroughActive ? 'z-[59]' : ''}>
+              {howItWorksButton}
+            </div>
+          )}
         </div>
       </div>
     </header>
